@@ -1,4 +1,6 @@
-
+//This sketch is designed for the Arduino Mega 2560.
+//Created by Scott Billeg.
+//Toasty Cat Productions, 2012
   //-------------------------------------------------------// 
 
   #include <Servo.h>  //Arduino Servo library
