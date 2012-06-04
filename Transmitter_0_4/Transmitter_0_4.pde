@@ -79,8 +79,8 @@ axisRY = int(-sliderRY.getValue()); //XBOX
 //axisRY = int(-stickXY.getX()); //PS3
 button0x = joypad.getButton(0);
 button0 = int(button0x.getValue());
-//println(axisX);
-//println(axisY);
+println(axisX);
+println(axisY);
 }
 // ------ SEND THAT DATA, YO ----------
 void SendData(){
@@ -130,66 +130,73 @@ if(axisX != lastaxisX || axisY != lastaxisY){
   */
 }
 void SendCommand(int value1, int value2, int value3){
-  if(value1 == 0){
-    if(value2 == 0){
-      Xbee.write('x');
+  
+  Xbee.write('F');
       Xbee.write(value1);
-     // println('x');
+      println(value1);
       Xbee.write(value2);
-     // println(value2);
+      println(byte(value2));
      SendCam(axisRX);
-    }
-  }
-  if(value1 == 0){
-    if(value2 >= 0){
-      Xbee.write('F');
-      Xbee.write(0);
+ // if(value1 == 0){
+  //  if(value2 == 0){
+   //   Xbee.write('x');
+   //   Xbee.write(value1);
+     // println('x');
+  //    Xbee.write(value2);
+     // println(value2);
+  //   SendCam(axisRX);
+ //   }
+//  }
+//  if(value1 == 0){
+  //  if(value2 >= 0){
+   //   Xbee.write('F');
+   //   Xbee.write(0);
       //println(value1);
-      Xbee.write(value2);
+   //   Xbee.write(value2);
       //println(byte(value2));
-      SendCam(axisRX);
-    }
-    if(value2 < 0){
-      Xbee.write('B');
-      Xbee.write(0);
-      Xbee.write(value2); //NEG 9 for BACK
-      SendCam(axisRX);
+   //   SendCam(axisRX);
+  //  }
+ //   if(value2 < 0){
+  //    Xbee.write('B');
+ //     Xbee.write(0);
+  //    Xbee.write(value2); //NEG 9 for BACK
+  //    SendCam(axisRX);
 
  
-    }
-  }
-  else if(value1 < 0){
-   if(value2 >= 0){
-    Xbee.write('L');
-    Xbee.write(-value1); 
-    Xbee.write(value2);
-    SendCam(axisRX);
-    }
-    if(value2 < 0){
+  //  }
+ // }
+ // else if(value1 < 0){
+ //  if(value2 >= 0){
+  //  Xbee.write('L');
+  //  Xbee.write(-value1); 
+ //   Xbee.write(value2);
+  //  SendCam(axisRX);
+  //  }
+   // if(value2 < 0){
       //QUADRANT 4
-    Xbee.write('l');
-    Xbee.write(-value1); 
-    Xbee.write(value2);  //NEG
-    SendCam(axisRX);
-    }
-  }
-  else if(value1 > 0){
-   if(value2 >= 0){
-    Xbee.write('R');
-    Xbee.write(value1);
-    Xbee.write(value2);
-    SendCam(axisRX);
+  //  Xbee.write('l');
+ //   Xbee.write(-value1); 
+  //  Xbee.write(value2);  //NEG
+ //   SendCam(axisRX);
+   // }
+ // }
+ // else if(value1 > 0){
+ //  if(value2 >= 0){
+  //  Xbee.write('R');
+ //   Xbee.write(value1);
+  //  Xbee.write(value2);
+ //   SendCam(axisRX);
 
-    }
-    if(value2 < 0){
+  //  }
+  //  if(value2 < 0){
       //QUADRANT 3
-    Xbee.write('r');
-    Xbee.write(value1);
-    Xbee.write(value2); //NEG
-    SendCam(axisRX);
+  //  Xbee.write('r');
+  //  Xbee.write(value1);
+  //  Xbee.write(value2); //NEG
+  //  SendCam(axisRX);
 
-    }
-  }
+  //  }
+ // }
 }
 
 void SendCam(int value1){
