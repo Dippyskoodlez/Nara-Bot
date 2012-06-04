@@ -12,8 +12,8 @@ int axisX;
 int axisY;
 int motor0;
 int motor1;
-int lastaxisX;
-int lastaxisY;
+int lastmotor0;
+int lastmotor1;
 int axisRX;
 int axisRY;
 int lastaxisRX;
@@ -162,7 +162,7 @@ void quadrantMaths(){
     case 'B': //Quadrant II
         //Y is already negative; only need to change the X Value.
         motor0 = axisY;
-        motor1 = axisY - axisX; //Inverts X to go Backwards.
+        motor1 = axisY + axisX; 
         break;
     case 'C': //Quadrant III
         //This axis is like Q1, except negative.  Right faster than left, in reverse. Y > X
@@ -190,7 +190,7 @@ if(motor0 != lastmotor0 || motor1 != lastmotor1){
     //println("DIFFERENT");
     }
   else if((CurrentTime - LastSend) > SendInterval){
-    if(motor0 == lastmotor0 && motor1 == lastamotor1){
+    if(motor0 == lastmotor0 && motor1 == lastmotor1){
     SendCommand(motor0,motor1,axisRX);
     lastmotor0 = motor0;
     lastmotor1 = motor1;
