@@ -21,10 +21,14 @@ int button0;
 ControllIO controllIO;
 ControllDevice joypad;
 ControllCoolieHat hat1;
-ControllSlider sliderX;
-ControllSlider sliderY;
-ControllSlider sliderRX;
-ControllSlider sliderRY;
+// ControllSlider sliderX; XBOX
+// ControllSlider sliderY; XBOX
+
+// ControllSlider sliderRX; //XBOX ONLY
+// ControllSlider sliderRY; //XBOX ONLY
+ControllStick stickXY; //PS3 ONLY
+ControllStick stickRZ; //PS3 ONLY
+
 ControllButton button0x;
 //int[] buttonstates = new int[10];
 //int[] lastSent = new int [10];
@@ -33,17 +37,22 @@ ControllButton button0x;
 void setup(){
   Xbee = new Serial(this, Serial.list()[0],9600);
   controllIO = ControllIO.getInstance(this);
-  joypad = controllIO.getDevice("Controller");
-  sliderX = joypad.getSlider(0);
-  sliderY = joypad.getSlider(1);
- sliderRX = joypad.getSlider(2);
-  sliderRY = joypad.getSlider(3);
-  button0x = joypad.getButton(0);
-  sliderX.setMultiplier(9); //this will change based on your controller, see proControll library references for more
-  sliderY.setMultiplier(9); //
-  sliderRX.setMultiplier(10);
-  sliderRY.setMultiplier(10);
-joypad.setTolerance(0.10f); //deadzone basically, change based on your preferences/hardware
+ // joypad = controllIO.getDevice("Controller"); //xbox 360
+  joypad = controllIO.getDevice("PLAYSTATION(R)3 Controller"); //PS3
+ // sliderX = joypad.getSlider(0); XBOX
+//  sliderY = joypad.getSlider(1); XBOX
+ // sliderRX = joypad.getSlider(2); //XBOX ONLY
+  //sliderRY = joypad.getSlider(3); //XBOX ONLY
+  stickXY = joypad.getStick(0);  //PS3 ONLY
+  stickRZ = joypad.getStick(1); //PS3 ONLY
+  button0x = joypad.getButton(0); 
+ // sliderX.setMultiplier(9); //this will change based on your controller, see proControll library references for more
+ // sliderY.setMultiplier(9); // XBOX SLIDER ONLY
+  stickXY.setMultiplier(9);
+//  sliderRX.setMultiplier(10);
+ // sliderRY.setMultiplier(10);
+// joypad.setTolerance(0.10f);// XBOX deadzone basically, change based on your preferences/hardware
+stickXY.setTolerance(0.08f); // PS3
 }
 
 
@@ -60,10 +69,14 @@ ReceiveData();
 }
 // -------- GET CONTROLLER STATE -------
 void ReadController(){
-axisX = int(sliderX.getValue());
-axisY = int(-sliderY.getValue());
-axisRX = int(sliderRX.getValue());
-axisRY = int(-sliderRY.getValue());
+//axisX = int(sliderX.getValue()); // XBOX
+axisX = int( stickXY.getX() ); //PS3 LEFT STICK
+// axisY = int(-sliderY.getValue()); //XBOX
+axisY = int(-stickXY.getY()); //PS3
+// axisRX = int(sliderRX.getValue()); //XBOX
+axisRX = int(stickXY.getX()); //PS3
+//axisRY = int(-sliderRY.getValue()); //XBOX
+axisRY = int(-stickXY.getY());
 button0x = joypad.getButton(0);
 button0 = int(button0x.getValue());
 //println(axisX);
@@ -121,7 +134,7 @@ void SendCommand(int value1, int value2, int value3){
     if(value2 == 0){
       Xbee.write('x');
       Xbee.write(value1);
-      //println('x');
+     // println('x');
       Xbee.write(value2);
      // println(value2);
      SendCam(axisRX);

@@ -5,7 +5,7 @@
 
   #include <Servo.h>  //Arduino Servo library
 //  #include <NewPing.h> //NewPing library: http://arduino.cc/forum/index.php?topic=106043.0
-//  #include <SoftwareSerial.h> //Software serial over digital ports. NYI.
+ #include <SoftwareSerial.h> //Software serial over digital ports.
   #include <PololuQik.h> //Pololu Motor driver library
   
    //-------------------------------------------------------//
@@ -13,7 +13,7 @@
  // #define pingSpeed 400 //400ms pingspeed using newPing
   Servo myservo; //Servo connected to motorshield servo1 connector.
  // NewPing sonar1(12, 8, 500); //Sensor on pins 8 and 12.
- PololuQik2s12v10 qik(2, 3, 4); //TX, RX, Reset
+ PololuQik2s12v10 qik(14, 15, 22); //TX, RX, Reset
  
 //  unsigned long pingTimer1; 
   char incomingByte; //Reading the transmission in 4 byte queues, [char][int][int][int] (device, val, val, val)
@@ -25,6 +25,7 @@
 void  setup(){
   //Starts the serial connection, attaches the servo, and sets the ping timer to ~100ms
   Serial.begin(9600);
+  Serial3.begin(9600);
   
   myservo.attach(10); //Servo attached to pin X
   
