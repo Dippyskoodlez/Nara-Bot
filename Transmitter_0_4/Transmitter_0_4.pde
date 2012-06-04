@@ -72,11 +72,7 @@ void setup(){
 
 // ------ MAIN LOOP ------
 void draw(){
-/* Xbee.write("B");
-Xbee.write(1);
-Xbee.write(2);
-delay(1500);
-*/
+
 CurrentTime = millis();
 
 ReadController(); //Reads controller state.
@@ -200,32 +196,7 @@ if(motor0 != lastmotor0 || motor1 != lastmotor1){
     
     }
   }
-/*  if(button0 > 0){
-    delay(10);
-  Xbee.write('h');
-  Xbee.write(0);
-  Xbee.write(0);
-  }
-*/
-  
-/*if(axisRX != lastaxisRX || axisRY != lastaxisRY){
-    SendCam(axisRX,axisRY);
-    lastaxisRX = axisRX;
-    lastaxisRY = axisRY;
-    LastCamSend = CurrentTime;
-    //println("DIFFERENT");
-    }
-  else if((CurrentTime - LastCamSend) > CamInterval){
-    if(axisRX == lastaxisRX && axisRY == lastaxisRY){
-    SendCommand(axisRX,axisRY);
-    lastaxisRX = axisRX;
-    lastaxisRY = axisRY;
-    LastCamSend = CurrentTime;
-    //println("SAME");
-    
-    }
-  }
-  */
+
 }
 void SendCommand(int value1, int value2, int value3){
   
@@ -239,68 +210,10 @@ void SendCommand(int value1, int value2, int value3){
       print("RIGHT:");
       print(value2);
      SendCam(axisRX);
- // if(value1 == 0){
-  //  if(value2 == 0){
-   //   Xbee.write('x');
-   //   Xbee.write(value1);
-     // println('x');
-  //    Xbee.write(value2);
-     // println(value2);
-  //   SendCam(axisRX);
- //   }
-//  }
-//  if(value1 == 0){
-  //  if(value2 >= 0){
-   //   Xbee.write('F');
-   //   Xbee.write(0);
-      //println(value1);
-   //   Xbee.write(value2);
-      //println(byte(value2));
-   //   SendCam(axisRX);
-  //  }
- //   if(value2 < 0){
-  //    Xbee.write('B');
- //     Xbee.write(0);
-  //    Xbee.write(value2); //NEG 9 for BACK
-  //    SendCam(axisRX);
 
- 
-  //  }
- // }
- // else if(value1 < 0){
- //  if(value2 >= 0){
-  //  Xbee.write('L');
-  //  Xbee.write(-value1); 
- //   Xbee.write(value2);
-  //  SendCam(axisRX);
-  //  }
-   // if(value2 < 0){
-      //QUADRANT 4
-  //  Xbee.write('l');
- //   Xbee.write(-value1); 
-  //  Xbee.write(value2);  //NEG
- //   SendCam(axisRX);
-   // }
- // }
- // else if(value1 > 0){
- //  if(value2 >= 0){
-  //  Xbee.write('R');
- //   Xbee.write(value1);
-  //  Xbee.write(value2);
- //   SendCam(axisRX);
-
-  //  }
-  //  if(value2 < 0){
-      //QUADRANT 3
-  //  Xbee.write('r');
-  //  Xbee.write(value1);
-  //  Xbee.write(value2); //NEG
-  //  SendCam(axisRX);
-
-  //  }
- // }
 }
 
+// SERVO CODE (NYI)
 void SendCam(int value1){
   if(value1 < 0){
   Xbee.write((75-(-value1*6)));
