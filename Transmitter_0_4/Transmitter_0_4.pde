@@ -10,13 +10,16 @@ double LastCamSend;
 double CurrentTime;
 int axisX;
 int axisY;
+int motor0;
+int motor1;
 int lastaxisX;
 int lastaxisY;
 int axisRX;
 int axisRY;
 int lastaxisRX;
 int lastaxisRY;
-Boolean spideysense = false;
+int invertaxis;
+char spideysense;
 int button0;
 
 ControllIO controllIO;
@@ -124,60 +127,73 @@ void ProcessController360(){
                -Y
   ----------------------------------------*/
   //Motor 0 becomes byte 2 (Axis X) Motor 1 becomes byte 3 (Axis Y)
-    spideysense = false; //Starts the detect loop.
+ 
   //Quadrant I Logic
-  while (spideysense = false){
   if (axisX > 0 && axisY >0){
-  //This is FWD/Right turning, so X will stay the same (Left overpowering right),
-  // But right(M1) will slowly decrease based on Y value.
-  axisY = axisX-axisY;
-  spideysense = true;  //Interrupts the rest of the ifs.
-  break;
+  spideysense = 'A';
   }
   //Quadrant II Logic
   if (axisX > 0 && axisY < 0){
-    //Y is already negative; only need to change the X Value.
-    axisX = -(axisX); //Inverts X to go Backwards. 
-   spideysense = true;  //Interrupts the rest of the ifs.
-  break;
+   spideysense = 'B';
   }
   
   //Quadrant III Logic
   else if (axisX < 0 && axisY < 0) {
-    //This axis is like Q1, except negative.  Right faster than left, in reverse. Y > X
-    axisX = axisY - axisX; //NEGATIVES ADD, DUMMY. (-Y - -x) = (-Y + X)
-    spideysense = true;  //Interrupts the rest of the ifs.
-  break;
+    spideysense = 'C';  
   }
   
   //Quadrant IV Logic
   else if (axisX < 0 && axisY > 0){
-   //axis X reads negative, but we're going forward, turning left. Adding a negative to a positive.
-   axisX = axisY + axisX;
-  spideysense = true;  //Interrupts the rest of the ifs.
-  break;
+  spideysense = 'D';  
   }
+  quadrantMaths();
+  
   //Done! 
   }
-}
-
+  
+void quadrantMaths(){
+  
+  switch(spideysense){
+    case 'A': //Quadrant I
+        //This is FWD/Right turning
+        motor0 = axisY; //Left Full throttle speed.
+        motor1 = axisY - axisX; //Reduce right motor by x Axis. 
+        break;
+    case 'B': //Quadrant II
+        //Y is already negative; only need to change the X Value.
+        motor0 = axisY;
+        motor1 = axisY - axisX; //Inverts X to go Backwards.
+        break;
+    case 'C': //Quadrant III
+        //This axis is like Q1, except negative.  Right faster than left, in reverse. Y > X
+        motor0 = axisY - axisX; //NEGATIVES ADD, DUMMY. (-Y - -x) = (-Y + X)
+        motor1 = axisY;
+        break;
+    case 'D': //Quadrant IV
+       //axis X reads negative, but we're going forward, turning left. Adding a negative to a positive.
+       motor0 = axisY + axisX;
+       motor1 = axisY;
+       break;
+    
+  }
+  }
 
 // ------ SEND THAT DATA, YO ----------
 void SendData(){
 //compare last sent array to current
-if(axisX != lastaxisX || axisY != lastaxisY){
-    SendCommand(axisX,axisY,axisRX);
-    lastaxisX = axisX;
-    lastaxisY = axisY;
+if(motor0 != lastmotor0 || motor1 != lastmotor1){
+    SendCommand(motor0,motor1,axisRX);
+    lastmotor0 = motor0;
+    lastmotor1 = motor1;
     LastSend = CurrentTime;
     //Debug: This line tells you if it is reading the control pad correctly. (Changing state)
     //println("DIFFERENT");
     }
   else if((CurrentTime - LastSend) > SendInterval){
-    if(axisX == lastaxisX && axisY == lastaxisY){
-    SendCommand(axisX,axisY,axisRX);
-    lastaxisX = axisX;
-    lastaxisY = axisY;
+    if(motor0 == lastmotor0 && motor1 == lastamotor1){
+    SendCommand(motor0,motor1,axisRX);
+    lastmotor0 = motor0;
+    lastmotor1 = motor1;
     LastSend = CurrentTime;
     //Debug: This line tells you if it is reading the control pad correctly. (and seeing a constant state)
     //println("SAME");
