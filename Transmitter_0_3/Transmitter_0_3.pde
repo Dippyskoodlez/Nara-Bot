@@ -70,13 +70,13 @@ ReceiveData();
 // -------- GET CONTROLLER STATE -------
 void ReadController(){
 //axisX = int(sliderX.getValue()); // XBOX
-axisX = int( stickXY.getX() ); //PS3 LEFT STICK
+axisX = int(stickXY.getY() ); //PS3 LEFT STICK
 // axisY = int(-sliderY.getValue()); //XBOX
-axisY = int(-stickXY.getY()); //PS3
+axisY = int(-stickXY.getX()); //PS3
 // axisRX = int(sliderRX.getValue()); //XBOX
-axisRX = int(stickXY.getX()); //PS3
+axisRX = int(stickXY.getY()); //PS3
 //axisRY = int(-sliderRY.getValue()); //XBOX
-axisRY = int(-stickXY.getY());
+axisRY = int(-stickXY.getX());
 button0x = joypad.getButton(0);
 button0 = int(button0x.getValue());
 //println(axisX);
@@ -152,21 +152,24 @@ void SendCommand(int value1, int value2, int value3){
     if(value2 < 0){
       Xbee.write('B');
       Xbee.write(0);
-      Xbee.write(-value2);
+      Xbee.write(value2); //NEG 9 for BACK
       SendCam(axisRX);
+
+ 
     }
   }
   else if(value1 < 0){
    if(value2 >= 0){
     Xbee.write('L');
-    Xbee.write(-value1);
+    Xbee.write(-value1); 
     Xbee.write(value2);
     SendCam(axisRX);
     }
     if(value2 < 0){
+      //QUADRANT 4
     Xbee.write('l');
-    Xbee.write(-value1);
-    Xbee.write(-value2);
+    Xbee.write(-value1); 
+    Xbee.write(value2);  //NEG
     SendCam(axisRX);
     }
   }
@@ -176,12 +179,15 @@ void SendCommand(int value1, int value2, int value3){
     Xbee.write(value1);
     Xbee.write(value2);
     SendCam(axisRX);
+
     }
     if(value2 < 0){
+      //QUADRANT 3
     Xbee.write('r');
     Xbee.write(value1);
-    Xbee.write(-value2);
+    Xbee.write(value2); //NEG
     SendCam(axisRX);
+
     }
   }
 }

@@ -13,7 +13,7 @@
  // #define pingSpeed 400 //400ms pingspeed using newPing
   Servo myservo; //Servo connected to motorshield servo1 connector.
  // NewPing sonar1(12, 8, 500); //Sensor on pins 8 and 12.
- PololuQik2s12v10 qik(14, 15, 22); //TX, RX, Reset
+ PololuQik2s12v10 qik(2, 3, 4); //TX, RX, Reset
  
 //  unsigned long pingTimer1; 
   char incomingByte; //Reading the transmission in 4 byte queues, [char][int][int][int] (device, val, val, val)
@@ -25,17 +25,14 @@
 void  setup(){
   //Starts the serial connection, attaches the servo, and sets the ping timer to ~100ms
   Serial.begin(9600);
-  Serial3.begin(9600);
   
   myservo.attach(10); //Servo attached to pin X
   
-  Serial.println("qik 2s12v10 dual serial motor controller");
+  //Serial.println("qik 2s12v10 dual serial motor controller");
   
-  qik.init();
+  qik.init(9600);
   
-  Serial.print("Firmware version: ");
-  Serial.write(qik.getFirmwareVersion());
-  Serial.println();
+  //Serial.println();
  // pingTimer1 = millis() + pingSpeed;
 }
 //-------------------------------------------------------// 
@@ -67,10 +64,10 @@ void ReadIncoming(){
   }
                     // Uncomment these to debug sent/recieved data transmission (loopback)
                // Serial.write(incomingByte4);
-                Serial.println("I received:");
-                Serial.println(incomingByte);
-                Serial.println(incomingByte2);
-                Serial.println(incomingByte3);
+              //  Serial.println("I received:");
+              //  Serial.println(incomingByte);
+              //  Serial.println(incomingByte2);
+              //  Serial.println(incomingByte3);
 
   
 }
@@ -83,13 +80,13 @@ void ExecuteCommands(){
   switch(incomingByte){
     case 'F':
     GoStraight(incomingByte3);
-      Serial.println("GOING STRAIGHT AT:");
-      Serial.println(incomingByte3, DEC);
+      //Serial.println("GOING STRAIGHT AT:");
+     // Serial.println(incomingByte3, DEC);
       break;
      case 'B':
         GoBack(incomingByte3);
-        Serial.println("GOING STRAIGHT AT:");
-        Serial.println(incomingByte3, DEC);
+      //  Serial.println("GOING STRAIGHT AT:");
+       // Serial.println(incomingByte3, DEC);
         break;
      case 'L':
         TurnLeftF(incomingByte2,incomingByte3);
@@ -123,7 +120,7 @@ void GoStraight(int FSpeed){
 //-------------------------------------------------------// 
 void GoBack(int FSpeedB){
   //Same as fwd, except reverse.
-  if(FSpeedB > 0 && FSpeedB < 10){
+  if(FSpeedB < 0 && FSpeedB > -10){
     qik.setM0Speed(FSpeedB*14);
     qik.setM1Speed(FSpeedB*14);
   }
@@ -137,7 +134,7 @@ void GoBack(int FSpeedB){
 void TurnLeftF(int FSpeedM,int FSpeedB){
   //Left turn by reducing the left motor speed
   if (FSpeedB < 10 && FSpeedB > 0 && FSpeedM < 10 && FSpeedM > 0){
-   qik.setM0Speed((FSpeedB*(14-(FSpeedM*2) )));
+   qik.setM0Speed((FSpeedB*(14-(FSpeedM) )));
    qik.setM1Speed(FSpeedB*14);
   }
   //Neutral turn
@@ -151,7 +148,7 @@ void TurnRightF(int FSpeedM,int FSpeedB){
   //Right turn by reducing Right motors.
   if (FSpeedB < 10 && FSpeedB > 0 && FSpeedM < 10 && FSpeedM > 0){
    qik.setM0Speed(FSpeedB*14);
-   qik.setM1Speed((FSpeedB*(14-(FSpeedM*2) )));
+   qik.setM1Speed((FSpeedB*(14-(FSpeedM) )));
   }
   //Neutral steer right
   else if(FSpeedB == 0 && FSpeedM > 0 && FSpeedM < 10){
@@ -162,7 +159,7 @@ void TurnRightF(int FSpeedM,int FSpeedB){
 //-------------------------------------------------------// 
 void TurnLeftB(int FSpeedM,int FSpeedB){
   //Turns left while in reverse
-  if (FSpeedB < 10 && FSpeedB > 0 && FSpeedM < 10 && FSpeedM > 0){
+  if (FSpeedB > -10 && FSpeedB < 0 && FSpeedM > -10 && FSpeedM < 0){
    qik.setM0Speed((FSpeedB*(14-(FSpeedM*2) )));
    qik.setM1Speed(FSpeedB*14);
   }
@@ -170,7 +167,7 @@ void TurnLeftB(int FSpeedM,int FSpeedB){
 //-------------------------------------------------------// 
 void TurnRightB(int FSpeedM,int FSpeedB){
   //Turn right while in reverse
-  if (FSpeedB < 10 && FSpeedB > 0 && FSpeedM < 10 && FSpeedM > 0){
+  if (FSpeedB > -10 && FSpeedB < 0 && FSpeedM > -10 && FSpeedM < 0){
    qik.setM0Speed(FSpeedB*14);
    qik.setM1Speed((FSpeedB*(14-(FSpeedM*2) )));
   }
