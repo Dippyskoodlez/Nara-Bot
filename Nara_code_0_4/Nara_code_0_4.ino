@@ -31,7 +31,10 @@ void  setup(){
   //Serial.println("qik 2s12v10 dual serial motor controller");
   
   qik.init(9600);
+  
+  //Not sure if this works or is necessary.
   qik.setBrakes(0, 0); //Sets the brake on M0,M1 to 0 (OFF)... 127 is full ON
+  
   //Serial.println();
  // pingTimer1 = millis() + pingSpeed;
 }
@@ -77,7 +80,7 @@ void ExecuteCommands(){
   myservo.write(incomingByte4); //Move the servo to the indicated location.
    // qik.setM0Speed(incomingByte2*6);
     // qik.setM1Speed(incomingByte3*6);
-     qik.setSpeeds(incomingByte2*6, incomingByte3*6);
+     qik.setSpeeds(incomingByte2*6, incomingByte3*6); //Sets motor 0, then motor 1 with one command.
   //Translate the command into a direction. F/B: Fwd/reverse, L/R: Left, Right, l/r: reverse turn.
  // switch(incomingByte){
    // case 'F':
