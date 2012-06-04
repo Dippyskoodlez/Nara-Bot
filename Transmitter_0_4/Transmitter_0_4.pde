@@ -19,15 +19,18 @@ int lastaxisRY;
 int button0;
 
 ControllIO controllIO;
-ControllDevice joypad;
-ControllCoolieHat hat1;
- ControllSlider sliderX; //XBOX
- ControllSlider sliderY; //XBOX
-
- ControllSlider sliderRX; //XBOX ONLY
- ControllSlider sliderRY; //XBOX ONLY
-//ControllStick stickXY; //PS3 ONLY
-//ControllStick stickRZ; //PS3 ONLY
+ControllDevice joypad; //joypad references your joypad as a whole.
+// --------------------- XBOX 360 Controls -------------
+// ControllCoolieHat hat1;
+ ControllSlider sliderX; //XBOX Left Slider X Axis
+ ControllSlider sliderY; //XBOX Left Slider Y Axis
+ ControllSlider sliderRX; //XBOX Right Slider X Axis
+ ControllSlider sliderRY; //XBOX Right Slider Y Axis
+ 
+ /*---------------------- PS3 --------------------------
+ControllStick stickXY; //PS3 ONLY
+ControllStick stickRZ; //PS3 ONLY
+*/ 
 
 ControllButton button0x;
 //int[] buttonstates = new int[10];
@@ -37,22 +40,26 @@ ControllButton button0x;
 void setup(){
   Xbee = new Serial(this, Serial.list()[0],9600);
   controllIO = ControllIO.getInstance(this);
-  joypad = controllIO.getDevice("Controller"); //xbox 360
- // joypad = controllIO.getDevice("PLAYSTATION(R)3 Controller"); //PS3
-  sliderX = joypad.getSlider(0);// XBOX
-  sliderY = joypad.getSlider(1); //XBOX
-  sliderRX = joypad.getSlider(2); //XBOX ONLY
-  sliderRY = joypad.getSlider(3); //XBOX ONLY
-  //stickXY = joypad.getStick(0);  //PS3 ONLY
-  //stickRZ = joypad.getStick(1); //PS3 ONLY
-  button0x = joypad.getButton(0); 
+  /* ------------------------PS3 Settings ------------
+  joypad = controllIO.getDevice("PLAYSTATION(R)3 Controller"); //PS3
+  stickXY = joypad.getStick(0);  //PS3 ONLY
+  stickRZ = joypad.getStick(1); //PS3 ONLY
+  stickXY.setMultiplier(9); //PS3
+  stickXY.setTolerance(0.08f); // PS3
+  */
+  // --------------------- XBOX Controls -------------
+  joypad = controllIO.getDevice("Controller"); //xbox 360 controller detection. 
+  sliderX = joypad.getSlider(0);  // Left Slider X axis
+  sliderY = joypad.getSlider(1);  // Left Slider Y Axis
+  sliderRX = joypad.getSlider(2); // Right Slider X Axis
+  sliderRY = joypad.getSlider(3); // Right Slider Y Axis
   sliderX.setMultiplier(9); //this will change based on your controller, see proControll library references for more
-  sliderY.setMultiplier(9); // XBOX SLIDER ONLY
-  //stickXY.setMultiplier(9); //PS3
+  sliderY.setMultiplier(9); 
   sliderRX.setMultiplier(10);
   sliderRY.setMultiplier(10);
- joypad.setTolerance(0.10f);// XBOX deadzone basically, change based on your preferences/hardware
-//stickXY.setTolerance(0.08f); // PS3
+ joypad.setTolerance(0.10f);// Deadzone change based on your preferences/hardware
+ //---------------------------------------------------
+  button0x = joypad.getButton(0);
 }
 
 
@@ -69,18 +76,27 @@ ReceiveData();
 }
 // -------- GET CONTROLLER STATE -------
 void ReadController(){
-axisX = int(sliderX.getValue()); // XBOX
-//axisX = int(stickXY.getY() ); //PS3 LEFT STICK
- axisY = int(-sliderY.getValue()); //XBOX
-//axisY = int(-stickXY.getX()); //PS3
-axisRX = int(sliderRX.getValue()); //XBOX
-//axisRX = int(stickXY.getY()); //PS3
-axisRY = int(-sliderRY.getValue()); //XBOX
-//axisRY = int(-stickXY.getX()); //PS3
+  
+  /* ----------------- PS3 STICKS--------------------
+  axisX = int(stickXY.getY() ); //PS3 LEFT STICK
+  axisY = int(-stickXY.getX()); //PS3 Left Stick XY
+  axisRX = int(stickXY.getY()); //PS3 Left Stick XY
+  axisRY = int(-stickXY.getX()); //PS3 Left Stick XY
+  */
+  //-------------------XBOX 360 STICKS --------------
+axisX = int(sliderX.getValue()); // XBOX Left Stick X
+axisY = int(-sliderY.getValue()); //XBOX Left Stick Y
+axisRX = int(sliderRX.getValue()); //XBOX Right Stick X
+axisRY = int(-sliderRY.getValue()); //XBOX Right Stick Y
+//----------------------------------------------------
+
 button0x = joypad.getButton(0);
 button0 = int(button0x.getValue());
+// DEBUG AXIS PRINTING ---
 println(axisX);
 println(axisY);
+println();
+// END DEBUG PRINTING ---
 }
 // ------ SEND THAT DATA, YO ----------
 void SendData(){
@@ -90,6 +106,7 @@ if(axisX != lastaxisX || axisY != lastaxisY){
     lastaxisX = axisX;
     lastaxisY = axisY;
     LastSend = CurrentTime;
+    //Debug: This line tells you if it is reading the control pad correctly.
     //println("DIFFERENT");
     }
   else if((CurrentTime - LastSend) > SendInterval){
@@ -98,6 +115,7 @@ if(axisX != lastaxisX || axisY != lastaxisY){
     lastaxisX = axisX;
     lastaxisY = axisY;
     LastSend = CurrentTime;
+    //Debug: This line tells you if it is reading the control pad correctly.
     //println("SAME");
     
     }
