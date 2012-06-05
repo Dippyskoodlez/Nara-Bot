@@ -57,7 +57,7 @@ void ReadIncoming(){
 //-------------------------------------------------------// 
 void ExecuteCommands(){
   
-     qik.setSpeeds(incomingByte2*6, incomingByte3*6); //Sets motor 0, then motor 1 with one command.
+     qik.setSpeeds(incomingByte2, incomingByte3); //Sets motor 0, then motor 1 with one command.
   
 }
 
