@@ -4,15 +4,22 @@
   //-------------------------------------------------------// 
  #include <SoftwareSerial.h> //Software serial over digital ports.
   #include <PololuQik.h> //Pololu Motor driver library
+   #include <AFMotor.h> //Adafruit motor header library: http://www.adafruit.com/products/81
   
  //-------------------------------------------------------//
  //Shield/Arduino specific definitions
   PololuQik2s12v10 qik(2, 3, 4); //TX, RX, Reset
+  AF_DCMotor motorL(1, MOTOR12_64KHZ);
+  AF_DCMotor motorR(2, MOTOR12_64KHZ);
+  AF_DCMotor motorL(3, MOTOR12_64KHZ); 
+  AF_DCMotor motorR(4, MOTOR12_64KHZ);
  
-  char incomingByte; //Reading the transmission in 4 byte queues, [char][int][int][int] (device, val, val, val)
-  int incomingByte2; //Motor 0 setting (left)
-  int incomingByte3; //Motor 1 setting (right)
-  int incomingByte4; //Old servo byte. NYI. Just here to help keep things from breaking.
+  char spideysense; //Reading the transmission in 4 byte queues, [char][int][int][int] (device, val, val, val)
+  int axisX; //Motor 0 setting (left)
+  int axisY; //Motor 1 setting (right)
+  int motor0;
+  int motor1;
+  int motortestvar = 40;
   int in1 = 0;
  //-------------------------------------------------------// 
 void  setup(){
@@ -28,37 +35,80 @@ void loop(){
   //Reads the incoming command.
   ReadIncoming();
   //Executes the command. Fetch boy, fetch!
-  ExecuteCommands();
+  quadrantMaths();
+  
 
 }
 //-------------------------------------------------------// 
 void ReadIncoming(){
-  if (Serial.available() > 3) {
+  if (Serial.available() > 2) {
     //Reads 4 bytes of serial buffer.
-        incomingByte = Serial.read(); //Direction (FWD/REV)
-        incomingByte2 = Serial.read(); //motor0
-        incomingByte3 = Serial.read(); //motor1
-        incomingByte4 = Serial.read(); //Servo Position
+        spideysense = Serial.read(); //Direction (FWD/REV)
+        axisX = Serial.read(); //motor0
+        axisY = Serial.read(); //motor1
                 
   }
-  else if(Serial.available() < 4){
-    //If the buffer doesn't have a complete command, it gets the flush again.
-    Serial.flush();
+
   }
            /* Uncomment these to debug sent/recieved data transmission (loopback)
-              Serial.write(incomingByte4);
               Serial.println("I received:");
-              Serial.println(incomingByte);
-              Serial.println(incomingByte2);
-              Serial.println(incomingByte3); */
+              Serial.println(spideysense);
+              Serial.println(axisX);
+              Serial.println(axisY); */
 
   
-}
+
 //-------------------------------------------------------// 
-void ExecuteCommands(){
+
+void quadrantMaths(){
+  axisX = axisX * 6; //Left motor MAX = 9*x
+  axisY = axisY* 6;  //Right motor MAX = 9*x
   
-     qik.setSpeeds(incomingByte2, incomingByte3); //Sets motor 0, then motor 1 with one command.
-  
-}
+  switch(spideysense){
+    case 'A': //Quadrant I
+        //This is FWD/Right turning
+        
+        motor0 = axisY; //Left Full throttle speed.
+        motor1 = axisY - axisX; //Reduce right motor by x Axis. 
+      //  Serial.println(30);
+      //  Serial.println(motor1);
+      Serial.println("Setting Motor");
+       qik.setM0Speed(motortestvar);
+     // qik.setM1Speed(40);
+        break;
+    case 'B': //Quadrant II
+        //Y is already negative; only need to change the X Value.
+        motor0 = axisY;
+        motor1 = axisY + axisX;
+       qik.setM0Speed(motor0);
+       qik.setM1Speed(motor1); 
+       // println(motor0);
+       // println(motor1);
+        break;
+    case 'C': //Quadrant III
+        //This axis is like Q1, except negative.  Right faster than left, in reverse. Y > X
+        motor0 = axisY - axisX; //NEGATIVES ADD, DUMMY. (-Y - -x) = (-Y + X)
+        motor1 = axisY;
+        qik.setM0Speed(motor0);
+        qik.setM1Speed(motor1);
+      //  println(motor0);
+      //  println(motor1);
+        break;
+    case 'D': //Quadrant IV
+       //axis X reads negative, but we're going forward, turning left. Adding a negative to a positive.
+       motor0 = axisY + axisX;
+       motor1 = axisY;
+       qik.setM0Speed(motor0);
+       qik.setM1Speed(motor1);
+      //  println(motor0);
+      //  println(motor1);
+       break;
+       case 'E':
+         qik.init(9600); //Reinit the Motor driver when DPAD up is pressed.
+         break;
+         
+    
+  }
+  }
 
 

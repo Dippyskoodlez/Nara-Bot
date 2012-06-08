@@ -10,10 +10,8 @@ double LastCamSend;
 double CurrentTime;
 int axisX;
 int axisY;
-int motor0;
-int motor1;
-int lastmotor0;
-int lastmotor1;
+int lastaxisX;
+int lastaxisY;
 int axisRX;
 int axisRY;
 int lastaxisRX;
@@ -59,10 +57,10 @@ void setup(){
   sliderY = joypad.getSlider(1);  // Left Slider Y Axis
   sliderRX = joypad.getSlider(2); // Right Slider X Axis
   sliderRY = joypad.getSlider(3); // Right Slider Y Axis
-  sliderX.setMultiplier(9);       //this will change based on your controller, see
-  sliderY.setMultiplier(9);       // proControll library references for more
-  sliderRX.setMultiplier(10);
-  sliderRY.setMultiplier(10);
+  sliderX.setMultiplier(2);       //this will change based on your controller, see
+  sliderY.setMultiplier(2);       // proControll library references for more
+  sliderRX.setMultiplier(1);
+  sliderRY.setMultiplier(1);
  joypad.setTolerance(0.10f);      // Deadzone change based on your preferences/hardware
  //---------------------------------------------------
  
@@ -79,7 +77,7 @@ ReadController(); //Reads controller state.
 ProcessController360(); // Translates controller state to the proper Qik motor speeds. 
 // ProcessControllerPS3(); // Translates controller state to the proper Qik motor speeds. 
 SendData();       // Sends the bot the information.
-ReceiveData();    //Recieves necessary data.
+//ReceiveData();    //Recieves necessary data.
 
 }
 // -------- GET CONTROLLER STATE -------
@@ -129,7 +127,7 @@ void ProcessController360(){
   spideysense = 'A';
   }
   //Quadrant II Logic
-  if (axisX > 0 && axisY < 0){
+  else if (axisX > 0 && axisY < 0){
    spideysense = 'B';
   }
   
@@ -142,54 +140,32 @@ void ProcessController360(){
   else if (axisX < 0 && axisY > 0){
   spideysense = 'D';  
   }
-  quadrantMaths();
+  
+  else if (button0 == 8){
+    spideysense = 'E';
+  }
   
   //Done! 
   }
   
-void quadrantMaths(){
-  
-  switch(spideysense){
-    case 'A': //Quadrant I
-        //This is FWD/Right turning
-        motor0 = axisY; //Left Full throttle speed.
-        motor1 = axisY - axisX; //Reduce right motor by x Axis. 
-        break;
-    case 'B': //Quadrant II
-        //Y is already negative; only need to change the X Value.
-        motor0 = axisY;
-        motor1 = axisY + axisX; 
-        break;
-    case 'C': //Quadrant III
-        //This axis is like Q1, except negative.  Right faster than left, in reverse. Y > X
-        motor0 = axisY - axisX; //NEGATIVES ADD, DUMMY. (-Y - -x) = (-Y + X)
-        motor1 = axisY;
-        break;
-    case 'D': //Quadrant IV
-       //axis X reads negative, but we're going forward, turning left. Adding a negative to a positive.
-       motor0 = axisY + axisX;
-       motor1 = axisY;
-       break;
-    
-  }
-  }
+
 
 // ------ SEND THAT DATA, YO ----------
 void SendData(){
 //compare last sent array to current
-if(motor0 != lastmotor0 || motor1 != lastmotor1){
-    SendCommand(motor0,motor1,axisRX);
-    lastmotor0 = motor0;
-    lastmotor1 = motor1;
+if(axisX != lastaxisX || axisY != lastaxisY){
+    SendCommand(spideysense,axisX,axisY);
+    lastaxisX = axisX;
+    lastaxisY = axisY;
     LastSend = CurrentTime;
     //Debug: This line tells you if it is reading the control pad correctly. (Changing state)
     //println("DIFFERENT");
     }
   else if((CurrentTime - LastSend) > SendInterval){
-    if(motor0 == lastmotor0 && motor1 == lastmotor1){
-    SendCommand(motor0,motor1,axisRX);
-    lastmotor0 = motor0;
-    lastmotor1 = motor1;
+    if(axisX == lastaxisX && axisY == lastaxisY){
+    SendCommand(spideysense,axisX,axisY);
+    lastaxisX = axisX;
+    lastaxisY = axisY;
     LastSend = CurrentTime;
     //Debug: This line tells you if it is reading the control pad correctly. (and seeing a constant state)
     //println("SAME");
@@ -198,36 +174,20 @@ if(motor0 != lastmotor0 || motor1 != lastmotor1){
   }
 
 }
-void SendCommand(int value1, int value2, int value3){
-  
-  Xbee.write('F');
+void SendCommand(char value1, int value2, int value3){
+
       Xbee.write(value1);
-      println();
-      print("LEFT:");
-      print(value1);
-      
       Xbee.write(value2);
-      print("RIGHT:");
-      print(value2);
-     SendCam(axisRX);
+      Xbee.write(value3);
+     println(value1);
+     println(value2);
+     println(value3);
+     
+      
+      
+     // print("RIGHT:");
+    //  print(value2);
+     //SendCam(axisRX);
 
 }
 
-// SERVO CODE (NYI)
-void SendCam(int value1){
-  if(value1 < 0){
-  Xbee.write((75-(-value1*6)));
-  //println(75-(-value1*6));
-  }
-  else if(value1 >= 0){
-    Xbee.write((75+(value1)*10));
-  // println(75+(value1)*10);
-  }
-}
-
-void ReceiveData(){
-if (Xbee.available() > 0) {
-    int inByte = int(Xbee.read());
-    println(char(inByte));
-  }
-}

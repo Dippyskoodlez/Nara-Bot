@@ -2,6 +2,9 @@
 #include <PololuQik.h>
 
 PololuQik2s12v10 qik(2, 3, 4);
+char spideysense;
+byte axisX;
+byte axisY;
 
 void setup()  
 {
@@ -13,11 +16,22 @@ void setup()
 
 void loop() // run over and over
 {
-  qik.setM0Speed(100);
-  qik.setM1Speed(100);
-  Serial.println("GO");
-  delay(1000);
-  qik.setM0Speed(0);
-  Serial.println("STOP");
-  delay(1000);
+  while (Serial.available()>2) {
+    //Reads 4 bytes of serial buffer.
+       char spideysense = Serial.read(); //Direction (FWD/REV)
+       axisX = Serial.read(); //motor0
+       axisY = Serial.read(); //motor1
+       // Uncomment these to debug sent/recieved data transmission (loopback)
+              Serial.println("I received:");
+              Serial.println(spideysense);
+              Serial.println(axisX+axisY);
+              Serial.println(axisY); //--
+                
+  }
+ 
+  //else if(){
+    //If the buffer doesn't have a complete command, it gets the flush again.
+
+ // }
+           
 }
