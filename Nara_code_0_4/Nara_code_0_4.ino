@@ -41,7 +41,7 @@ void loop(){
 }
 //-------------------------------------------------------// 
 void ReadIncoming(){
-  if (Serial.available() > 2) {
+  if (Serial.available()) {
     //Reads 4 bytes of serial buffer.
         spideysense = Serial.read(); //Direction (FWD/REV)
         axisX = Serial.read(); //motor0
