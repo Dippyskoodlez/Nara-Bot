@@ -1,104 +1,138 @@
-//This sketch is designed for the Arduino Mega 2560.
-//Created by Scott Billeg.
-//Toasty Cat Productions, 2012
-//-------------------------------------------------------// 
-/* MEGA 2560 PINOUT
-Digital:
-1-
-2-
-3-
-4-
-5-
-6-
-7-
-8-
-9- WEBCAM SERVO
-10-
+  //-------------------------------------------------------// 
+  #include <AFMotor.h> //Adafruit motor header library: http://www.adafruit.com/products/81
 
-Analog:
-1-
-2-
-3-
-4-
-5-
-6-
-7-
-8-
+//Motor Layout (Wiring specific)
+  AF_DCMotor motorFL(4, MOTOR12_64KHZ);
+  AF_DCMotor motorBL(1, MOTOR12_64KHZ); 
+  AF_DCMotor motorFR(2, MOTOR12_64KHZ);  
+  AF_DCMotor motorBR(3, MOTOR12_64KHZ);
 
-Serial:
-0 TX/RX: USB/xBee
-1 TX/RX: (Digial 14/15) Qik 12v10
-2 TX/RX:
-3 TX/RX:
-*/
-
-#include <Servo.h>
-
-Servo webCam; //Creates object for webcam control MAX: 8
-int webPos = 0; //Stores webcam zeroize position.
-/*
-
-Legacy reference libraries. Softserial for Arduino Uno.
-#include <SoftwareSerial.h> //Software serial over digital ports.
-#include <PololuQik.h> //Pololu Motor driver library
-#include <AFMotor.h> //Adafruit motor header library: http://www.adafruit.com/products/81
-  
- */
+  char rcvDirection = 0; // Forward (F), Backward(B), Neutral steer(N)
+  int rcvSpeedL = 0; //0-255
+  int rcvSpeedR = 0;
+  bool validCmd = False;
+ 
  //-------------------------------------------------------// 
- void  setup(){
-   
-  Serial.begin(9600); //Initialize serial 0 (USB/xBEE)
-  Serial1.begin(9600); //Start the qik motor driver serial connection.
-  
-  webCam.attach(9) // Sets pin 9 to Servo attachment.
-
-  Serial.println("Good morning, Dave");
+void  setup(){
+  //Starts the serial connection
+  Serial.begin(9600);
+  Serial.write("Hello Dave.");
+  //Turn on motors. (released state)
+  motorFL.run(RELEASE);
+  motorBL.run(RELEASE);
+  motorFR.run(RELEASE);
+  motorBR.run(RELEASE);
 }
-
 //-------------------------------------------------------// 
 void loop(){ 
   //Reads the incoming command.
-  readCommand();
-  //Makes sure the read command is within the proper limits.
-  proofCommand();
-  //Sets the Motor values.
-  setMotors();
-  //Sets webcam Pivot
-  setCam();
+  ReadIncoming();
+  //Executes the command. Fetch boy, fetch!
+  ExecuteCommands();
+
+}
+
+/*--------------------------------------
+  Process the proper axis for sending motor speeds, based on quadrant read.
+  These are the Values that need SENT for proper motion, over the READ Values.
+        (F)    (Y)   (F)
+              (255)
+        IV      |     I
+    X:R Y:L     |  X:L Y:R
+    X:-R  Y:L   |  X:L Y:R
+(-X)(-255)-----------------(255-)(X)
+        (B)     |    (B)
+         III    |     II
+     X:-R Y:-L  | X:-L Y:-R
+     X:-R Y:-L  | X:L  Y:-R
+             (-255)
+              (-Y)
+----------------------------------------*/
+
+//-------------------------------------------------------// 
+void ReadIncoming(){
+  if (Serial.available()) {
+    
+  }
+  while(validCmd == false) {
+  //Read the incoming command, 1 byte, into memory to use as a command.
+ rcvDirection = Serial.read();
+ rcvSpeedL = Serial.read();
+ rcvSpeedR = Serial.read();
+
+//Verify valid direction and min/max speed recieved.
+ if (rcvDirection == 'F' || 'B' || 'n'){
+  if (rcvSpeedL >= 0 && rcvSpeedL <= 255){
+    if rcvSpeedR >= 0 && rcvSpeedR <= 255) {
+        validCmd = True ;
+       }
+     }
+    }
+  }
+
+}
+//-------------------------------------------------------// 
+void ExecuteCommands(){
   
+  //Translate the command into a direction. F/B: Fwd/reverse, L/R: Left, Right, l/r: reverse turn.
+  switch(rcvDirection){
+    //Checks the first byte recieved for the direction to start: Forward, Backward or Neutral steer.
+    case 'F':
+    // Reply with the direction intended to go
+      Serial.println("GOING STRAIGHT AT:");
+      Serial.println(rcvSpeedL, rcvspeedR);
+      //Start moving with forward intent.
+      GoForward(rcvSpeedL, rcvSpeedR);
+      break;
+    case 'B':
+    //Reply with the direction to go
+      Serial.println("GOING BACKWARDS AT:");
+      Serial.println(rcvSpeedL, rcvSpeedR);
+      //Start moving with backwards intent.
+      GoBackwards(rcvSpeedL, rcvSpeedR);
+      break;
+    case 'N':
+    // Dat neutral steer.
+      Serial.println("NEUTRAL JUST KICKED IN YO")
+      NeutralSteer(rcvSpeedL, rcvSpeedR);
+      break;
+  }
 }
 //-------------------------------------------------------// 
-void readCommand(){
-  if (Serial.available()){
-    //read each byte of serial buffer.
-   //Motor 0 (-127/127)
-   //Motor 1 (-127/127)
-   //Servo 0 (On/Off)
-   //Servo 1 (On/Off)
-   //Servo 2 (On/Off)
-   //Servo 3 (On/Off)
-   //Servo 4 (On/Off)
-   //Webcam Servo 0 (-90/90)
-   //Webcam servo 1 (-90/90)
-}
-
-
-//-------------------------------------------------------// 
-void proofCommand(){
-}
-
-
-
-//-------------------------------------------------------// 
-void setMotors(){
-  //Sets the Qik12v10 (Main drive) motor controller.
-  setQikMotor();
-  //Sets Adafruit Servo driver.
-  setAdaMotor();
+//Set motor driver to appropriate fwd speeds.
+void GoForward(int FSpeedL, int FSpeedR){
+  //seperates stop and go command.  Min/Max motor speeds here.
   
+    motorFL.setSpeed(FSpeedL);
+    motorBR.setSpeed(FSpeedL);
+    motorFR.setSpeed(FSpeedR);
+    motorBR.setSpeed(FSpeedR);
+    motorFL.run(FORWARD);
+    motorFR.run(FORWARD);
+    motorFR.run(FORWARD);
+    motorBR.run(FORWARD);
 }
 //-------------------------------------------------------// 
-void setCam(){
-  //Sets the webcam position according to webPos integer. (-90/90 expected.)
-  webCam.write(webPos);
+void GoBackwards(int FSpeedL, int FSpeedR){
+  //Same as fwd, except reverse.
+    motorFL.setSpeed(FSpeedL);
+    motorBR.setSpeed(FSpeedL);
+    motorFR.setSpeed(FSpeedR);
+    motorBR.setSpeed(FSpeedR);
+    motorFL.run(BACKWARD);
+    motorFR.run(BACKWARD);
+    motorFR.run(BACKWARD);
+    motorBR.run(BACKWARD);
+}
+//-------------------------------------------------------// 
+void NeutralSteer(int FSpeedL, int FSpeedR){
+
+//Neutral Left
+  //invert numbers... -255?
+if (FSpeedL <= -10 && FSpeedL >= 0)
+
+
+//Neutral right
+
+
 }
