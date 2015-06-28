@@ -104,35 +104,50 @@ void GoForward(int FSpeedL, int FSpeedR){
   //seperates stop and go command.  Min/Max motor speeds here.
   
     motorFL.setSpeed(FSpeedL);
-    motorBR.setSpeed(FSpeedL);
+    motorBL.setSpeed(FSpeedL);
     motorFR.setSpeed(FSpeedR);
     motorBR.setSpeed(FSpeedR);
     motorFL.run(FORWARD);
     motorFR.run(FORWARD);
-    motorFR.run(FORWARD);
+    motorBL.run(FORWARD);
     motorBR.run(FORWARD);
 }
 //-------------------------------------------------------// 
 void GoBackwards(int FSpeedL, int FSpeedR){
   //Same as fwd, except reverse.
     motorFL.setSpeed(FSpeedL);
-    motorBR.setSpeed(FSpeedL);
+    motorBL.setSpeed(FSpeedL);
     motorFR.setSpeed(FSpeedR);
     motorBR.setSpeed(FSpeedR);
     motorFL.run(BACKWARD);
     motorFR.run(BACKWARD);
-    motorFR.run(BACKWARD);
+    motorBL.run(BACKWARD);
     motorBR.run(BACKWARD);
 }
 //-------------------------------------------------------// 
 void NeutralSteer(int FSpeedL, int FSpeedR){
 
 //Neutral Left
-  //invert numbers... -255?
-if (FSpeedL <= -10 && FSpeedL >= 0)
-
+  //Negative X value, positive Y
+if (FSpeedR <= -10 && FSpeedL >= 0){
+    motorFL.setSpeed(FSpeedL);
+    motorFR.setSpeed(FSpeedR);
+    motorBL.setSpeed(FSpeedL);
+    motorBR.setSpeed(FSpeedR);
+    motorFL.run(RELEASE);
+    motorFR.run(FORWARD);
+    motorBL.run(RELEASE);
+    motorBR.run(FORWARD);
+}
 
 //Neutral right
-
-
+if (FSpeedL <= -10 && FSpeedR >= 0){
+    motorFL.setSpeed(FSpeedL);
+    motorFR.setSpeed(FSpeedR);
+    motorBL.setSpeed(FSpeedL);
+    motorBR.setSpeed(FSpeedR);
+    motorFL.run(FORWARD);
+    motorFR.run(RELEASE);
+    motorBL.run(FORWARD);
+    motorBR.run(RELEASE);
 }
